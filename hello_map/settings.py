@@ -31,14 +31,15 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'mapping',
-    'django.contrib.gis',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.gis',  # GeoDjango (already added in Week 1)
+    'mapping',             # Week 1 app
+    'spatial_analysis',    # NEW: Week 2 app
 ]
 
 MIDDLEWARE = [

@@ -1,0 +1,285 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{{ poi.poi_name }} - Dublin Spatial Analysis</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #f4f6f8;
+            color: #333;
+        }
+
+        header {
+            background-color: #1f2937;
+            color: white;
+            padding: 20px 40px;
+        }
+
+        header h1 {
+            margin: 0;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #2563eb;
+            text-decoration: none;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .poi-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .poi-header h2 {
+            margin: 0;
+            font-size: 28px;
+        }
+
+        .type {
+            background-color: #2563eb;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+
+        .details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .detail {
+            padding: 15px;
+            background-color: #f9fafb;
+            border-radius: 6px;
+        }
+
+        .detail strong {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+        }
+
+        .rating {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .description {
+            line-height: 1.6;
+        }
+
+        .roads {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .roads li {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .roads li:last-child {
+            border-bottom: none;
+        }
+
+        .coordinates {
+            font-family: monospace;
+            background-color: #f3f4f6;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        @media (max-width: 600px) {
+            .details {
+                grid-template-columns: 1fr;
+            }
+
+            .poi-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>Dublin Spatial Analysis</h1>
+</header>
+
+<div class="container">
+
+    <a href="{% url 'spatial_analysis_dashboard' %}" class="back-link">
+        ← Back to Dashboard
+    </a>
+
+    <!-- POI Information -->
+    <div class="card">
+
+        <div class="poi-header">
+            <h2>{{ poi.poi_name }}</h2>
+
+            <span class="type">
+                {{ poi.get_poi_type_display }}
+            </span>
+        </div>
+
+        <div class="details">
+
+            <div class="detail">
+                <strong>POI Name</strong>
+                {{ poi.poi_name }}
+            </div>
+
+            <div class="detail">
+                <strong>Type</strong>
+                {{ poi.get_poi_type_display }}
+            </div>
+
+            {% if poi.rating %}
+            <div class="detail">
+                <strong>Rating</strong>
+                <span class="rating">
+                    ⭐ {{ poi.rating }}
+                </span>
+            </div>
+            {% endif %}
+
+            {% if poi.visitors_per_day %}
+            <div class="detail">
+                <strong>Visitors Per Day</strong>
+                {{ poi.visitors_per_day }}
+            </div>
+            {% endif %}
+
+        </div>
+
+        {% if poi.description %}
+        <div class="description">
+            <h3>Description</h3>
+            <p>{{ poi.description }}</p>
+        </div>
+        {% endif %}
+
+    </div>
+
+
+    <!-- Location -->
+    <div class="card">
+
+        <h2>Location</h2>
+
+        <p>
+            Coordinates:
+        </p>
+
+        <div class="coordinates">
+            Latitude: {{ poi.geom.y }}<br>
+            Longitude: {{ poi.geom.x }}
+        </div>
+
+    </div>
+
+
+    <!-- Nearby Roads -->
+    <div class="card">
+
+        <h2>Nearby Roads</h2>
+
+        {% if nearby_roads %}
+
+            <ul class="roads">
+
+                {% for road in nearby_roads %}
+
+                    <li>
+
+                        <strong>{{ road.road_name }}</strong>
+
+                        <br>
+
+                        Type:
+                        {{ road.get_road_type_display }}
+
+                        {% if road.speed_limit %}
+                            <br>
+                            Speed Limit:
+                            {{ road.speed_limit }} km/h
+                        {% endif %}
+
+                        {% if road.length_meters %}
+                            <br>
+                            Road Length:
+                            {{ road.length_meters }} m
+                        {% endif %}
+
+                    </li>
+
+                {% endfor %}
+
+            </ul>
+
+        {% else %}
+
+            <p>No nearby roads were found.</p>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- Spatial Geometry -->
+    <div class="card">
+
+        <h2>Spatial Geometry</h2>
+
+        <p>
+            GeoJSON representation of this POI:
+        </p>
+
+        <div class="coordinates">
+            {{ poi_json }}
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>
+```
