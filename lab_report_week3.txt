@@ -1,0 +1,69 @@
+## Lab Completion Summary
+
+The objective of this lab was to develop a RESTful Cities API using Django, Django REST Framework, 
+and PostGIS. The completed project provides an API for storing, retrieving, filtering, and analysing city
+data with spatial information.
+
+The project includes a `City` model containing attributes such as city name, country, population, 
+capital status, and geographic location using a PostGIS `PointField`. Django REST Framework was used to create API
+ endpoints for performing CRUD operations and retrieving city information in different formats.
+
+The API provides endpoints for city listings, individual city details, GeoJSON output, spatial queries, statistics,
+ country information, and API metadata. Filtering, searching, ordering, pagination, and spatial queries were also 
+ implemented.
+
+Automated tests were also created to verify important API functionality, including city listing, city creation,
+ filtering, GeoJSON responses, spatial queries, and statistics.
+
+
+## Challenges Encountered and Solutions
+
+An issue occurred when the spatial analysis dashboard was accessed before the required database migrations 
+had been applied. Django reported that the `spatial_analysis_dublinadminarea` database table did not exist. 
+This was resolved by running the Django migration command inside the Docker web container.
+
+
+Working with Docker also required checking the status of the individual containers and examining Django logs 
+when errors occurred. Using commands such as `docker compose ps`, `docker compose logs web`, and
+ `docker compose exec web python manage.py migrate` helped identify and resolve configuration and database issues.
+
+
+## API Usage Examples
+
+### Retrieve all cities
+
+A `GET` request can be used to retrieve the available cities:
+
+GET /api/cities/
+
+This returns a paginated response containing the city records.
+
+### Retrieve a specific city
+
+A specific city can be retrieved using its ID:
+
+
+GET /api/cities/1/
+
+### Filter cities by country
+
+The API supports filtering using query parameters:
+
+
+GET /api/cities/?country=Ireland
+
+This returns cities whose country is Ireland.
+
+
+## Future Enhancement Suggestions
+
+Several improvements could be made to the Cities API in the future.
+
+
+1. **Improved performance**
+   Database indexing and spatial indexes could be further optimised as the dataset grows. Caching could also be 
+   introduced for frequently requested information.
+
+2. **Larger datasets**
+   The API could be connected to a larger real-world dataset containing thousands of cities and additional 
+   information such as elevation, timezone, language, and demographic data.
