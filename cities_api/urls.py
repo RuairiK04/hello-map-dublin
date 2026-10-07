@@ -10,8 +10,7 @@ urlpatterns = [
     path('<int:pk>/', views.CityDetailView.as_view(), name='city-detail'),
 
     # Special format endpoints
-    path('geojson/', views.CityGeoJSONView.as_view(), name='city-geojson'),
-
+    path('geojson/', views.cities_geojson, name='city-geojson'),
     # Spatial query endpoints
     path('within-radius/', views.cities_within_radius, name='cities-within-radius'),
     path('bbox/', views.cities_in_bounding_box, name='cities-bbox'),
@@ -21,4 +20,3 @@ urlpatterns = [
     path('countries/', views.countries_list, name='countries-list'),
     path('info/', views.api_info, name='api-info'),
 ]
-

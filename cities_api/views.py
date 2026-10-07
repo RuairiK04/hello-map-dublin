@@ -7,6 +7,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django.contrib.gis.geos import Point
 from django.db.models import Count, Avg, Q, Sum
 from django.contrib.gis.measure import Distance
+from django.contrib.gis.db.models.functions import Distance as DistanceFunction
 
 from .models import City
 from .serializers import (
@@ -15,6 +16,39 @@ from .serializers import (
     BoundingBoxSerializer
 )
 from .filters import CityFilter
+
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+import json
+
+@api_view(['GET'])
+def cities_geojson(request):
+    """Export cities as GeoJSON"""
+
+    cities = City.objects.all()
+
+    features = []
+
+    for city in cities:
+        feature = {
+            'type': 'Feature',
+            'properties': {
+                'name': city.name,
+                'country': city.country,
+                'population': city.population,
+            },
+            'geometry': {
+                'type': 'Point',
+                'coordinates': [city.longitude, city.latitude]
+            }
+        }
+
+        features.append(feature)
+
+    return Response({
+        'type': 'FeatureCollection',
+        'features': features
+    })
 
 class StandardResultsSetPagination(PageNumberPagination):
     """Custom pagination class"""
@@ -112,27 +146,30 @@ def city_statistics(request):
 
 @api_view(['POST'])
 def cities_within_radius(request):
-    """
-    Find cities within specified radius of a point
-    """
+    """Find cities within specified radius of a point"""
+
     serializer = DistanceSerializer(data=request.data)
+
     if serializer.is_valid():
         data = serializer.validated_data
+
         center_point = Point(
             data['longitude'],
             data['latitude'],
             srid=4326
         )
 
-        cities = City.objects.within_radius(
-            center_point,
-            data['radius_km']
+        cities = City.objects.filter(
+            location__distance_lte=(
+                center_point,
+                Distance(km=data['radius_km'])
+            )
         ).annotate(
-            distance=Distance('location', center_point)
+            distance=DistanceFunction('location', center_point)
         ).order_by('distance')
 
-        # Add distance to serialized data
         city_data = CityListSerializer(cities, many=True).data
+
         for i, city in enumerate(cities):
             city_data[i]['distance_km'] = round(city.distance.km, 2)
 
@@ -146,7 +183,10 @@ def cities_within_radius(request):
             'cities': city_data
         })
 
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    return Response(
+        serializer.errors,
+        status=status.HTTP_400_BAD_REQUEST
+    )
 
 @api_view(['POST'])
 def cities_in_bounding_box(request):
